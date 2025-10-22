@@ -9,7 +9,7 @@ include(CheckLanguage)
 check_language(CUDA)
 
 set(CMAKE_CXX_STANDARD 20)
-set(CUDA_COMPUTE_CAPABILITY 86)
+set(CUDA_COMPUTE_CAPABILITY 80)
 
 # in debug mode, add debug symbols to device code
 # this disables most optimizations and kills performance
@@ -21,6 +21,13 @@ include_directories(${CUDA_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/src)
 # Configure the source file path to be compiled
 aux_source_directory(${PROJECT_SOURCE_DIR}/src SRC)
+
+find_library(CUDA_CUBLAS_LIBRARIES
+    NAMES cublas
+    PATHS /global/rhel/opt/nvidia/hpc_sdk/Linux_x86_64/24.9/math_libs/lib64
+    REQUIRED
+)
+message(STATUS "cuBLAS library: ${CUDA_CUBLAS_LIBRARIES}")
 
 # generate executable
 add_executable(sgemm sgemm.cu ${SRC})
