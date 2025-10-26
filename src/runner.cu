@@ -54,6 +54,10 @@ void CudaDeviceInfo() {
 void randomize_matrix(float *mat, int N) {
   // NOTICE: Use gettimeofday instead of srand((unsigned)time(NULL)); the time
   // precision is too low and the same random number is generated.
+  // The time() function returns the time in seconds, this is too coarse for seeding 
+  // the random number generator for my liking, but can cause the same seed to be used 
+  // multiple times if the code is executed multiple times in the same second,
+  // resulting in identical sequences of pseudo-random numbers.
   struct timeval time {};
   gettimeofday(&time, nullptr);
   srand(time.tv_usec);
@@ -62,26 +66,6 @@ void randomize_matrix(float *mat, int N) {
     tmp = (rand() % 2 == 0) ? tmp : tmp * (-1.);
     mat[i] = tmp;
   }
-}
-
-void range_init_matrix(float *mat, int N) {
-  for (int i = 0; i < N; i++) {
-    mat[i] = i;
-  }
-}
-
-void zero_init_matrix(float *mat, int N) {
-  for (int i = 0; i < N; i++) {
-    mat[i] = 0.0;
-  }
-}
-
-void copy_matrix(const float *src, float *dest, int N) {
-  int i;
-  for (i = 0; src + i && dest + i && i < N; i++)
-    *(dest + i) = *(src + i);
-  if (i != N)
-    printf("copy failed at %d while there are %d elements in total.\n", i, N);
 }
 
 void print_matrix(const float *A, int M, int N, std::ofstream &fs) {
@@ -114,11 +98,6 @@ bool verify_matrix(float *matRef, float *matOut, int N) {
     }
   }
   return true;
-}
-
-int div_ceil(int numerator, int denominator) {
-  std::div_t res = std::div(numerator, denominator);
-  return res.rem ? (res.quot + 1) : res.quot;
 }
 
 void runCublasFP32(cublasHandle_t handle, int M, int N, int K, float alpha,
