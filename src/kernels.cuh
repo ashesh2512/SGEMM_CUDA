@@ -12,3 +12,7 @@
 #include "kernels/7_kernel_resolve_bank_conflicts.cuh"
 #include "kernels/8_kernel_bank_extra_col.cuh"
 #include "kernels/9_kernel_autotuned.cuh"
+
+#include "my_kernels/101_my_sgemm_naive.cuh"
+#include "my_kernels/102_my_sgemm_global_coalesced.cuh"
+#include "my_kernels/103_my_sgemm_shared_mem.cuh"
