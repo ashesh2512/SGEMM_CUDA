@@ -502,6 +502,18 @@ void run_my_sgemm_shared_mem(int M, int N, int K, float alpha, float *A, float *
     <<<gridDim, blockDim>>>(M, N, K, alpha, A, B, beta, C);
 }
 
+void run_my_sgemm_1D_multi_elems(int M, int N, int K, float alpha, float *A, float *B,
+                     float beta, float *C) {
+  const uint BM = 64;
+  const uint BN = 64;
+  const uint BK = 8;
+  const uint TM = 8;
+  dim3 gridDim(CEIL_DIV(N, BN), CEIL_DIV(M, BM));
+  dim3 blockDim(BN*BM/TM);
+  my_sgemm_1D_multi_elems<BM, BN, BK, TM>
+      <<<gridDim, blockDim>>>(M, N, K, alpha, A, B, beta, C);
+}
+
 void run_kernel(int kernel_num, int M, int N, int K, float alpha, float *A,
                 float *B, float beta, float *C, cublasHandle_t handle) {
   switch (kernel_num) {
@@ -552,6 +564,9 @@ void run_kernel(int kernel_num, int M, int N, int K, float alpha, float *A,
     break;
   case 103:
     run_my_sgemm_shared_mem(M, N, K, alpha, A, B, beta, C);
+    break;
+  case 104:
+    run_my_sgemm_1D_multi_elems(M, N, K, alpha, A, B, beta, C);
     break;
   default:
     throw std::invalid_argument("Unknown kernel number");

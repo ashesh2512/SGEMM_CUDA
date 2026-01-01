@@ -16,3 +16,4 @@
 #include "my_kernels/101_my_sgemm_naive.cuh"
 #include "my_kernels/102_my_sgemm_global_coalesced.cuh"
 #include "my_kernels/103_my_sgemm_shared_mem.cuh"
+#include "my_kernels/104_my_sgemm_1D_multi_elems.cuh"
