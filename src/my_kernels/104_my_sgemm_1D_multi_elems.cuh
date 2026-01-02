@@ -31,8 +31,8 @@ __global__ void my_sgemm_1D_multi_elems(int M, int N, int K, float alpha, const 
   const uint B_chunk_row = threadIdx.x / BN; // 0 to 7
 
   // we call this thread, and not chunk, because the C chunk (64 x 64) is bigger than the number of threads in the block
-  const uint C_thread_col = threadIdx.x % BN; // 0 to 63
-  const uint C_thread_row = threadIdx.x / BN; // 0 to 7 - each thread contributes to TM (8) values in C
+  const uint C_col_thread = threadIdx.x % BN; // 0 to 63
+  const uint C_row_thread = threadIdx.x / BN; // 0 to 7 - each thread contributes to TM (8) values in C
 
   float tmp[TM] = {0.0f}; // TM values per thread
 
@@ -49,9 +49,9 @@ __global__ void my_sgemm_1D_multi_elems(int M, int N, int K, float alpha, const 
 
     for (uint i = 0; i < BK; ++i) {
       // this is basically a dotproduct
-      float b_val = B_s[i][C_thread_col];
+      float b_val = B_s[i][C_col_thread];
       for (uint t = 0; t < TM; ++t) {
-        tmp[t] += A_s[(C_thread_row * TM + t)][i] * b_val;
+        tmp[t] += A_s[C_row_thread * TM + t][i] * b_val;
       }
     }
     __syncthreads();
@@ -59,8 +59,8 @@ __global__ void my_sgemm_1D_multi_elems(int M, int N, int K, float alpha, const 
 
   // C = α*(A*B)+β*C
   for (uint t = 0; t < TM; ++t) {
-    const uint base_row = C_block_row + C_thread_row * TM + t;
-    const uint base_col = C_block_col + C_thread_col;
+    const uint base_row = C_block_row + C_row_thread * TM + t;
+    const uint base_col = C_block_col + C_col_thread;
     C[base_row * N + base_col] =
         alpha * tmp[t] + beta * C[base_row * N + base_col];
   }
